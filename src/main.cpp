@@ -27,12 +27,13 @@ int main(int argc, const char *const argv[]) {
   std::cout << "Sequence 1: " << seq1 << "; Sequence 2: " << seq2 << std::endl;
 
   std::string dimer_seq = seq1 + "&" + seq2;
+  size_t dimer_length = dimer_seq.size() - 1;
 
   std::cout << "Dimer sequence: " << dimer_seq << "\n";
 
   // Pointer for storing base pair probabilities.
   vrna_ep_t *ptr, *pl = NULL;
-  char *structure = new char[dimer_seq.size() + 1];
+  char *structure = new char[dimer_length];
 
   double mfe;
   vrna_dimer_pf_t X;
@@ -63,23 +64,24 @@ int main(int argc, const char *const argv[]) {
 
   pl = vrna_plist_from_probs(vc, /*cut_off:*/ 1e-10);
 
-  auto getIndex = [](int i, int j, size_t n1, size_t n2) -> int {
-    return (i - 1) * n2 + (j - n1 - 1);
+  auto getIndex = [](int i, int j, size_t columns) -> int {
+    return (i - 1) * columns + (j - 1);
   };
 
-  std::vector<float> probs(seq1.size() * seq2.size(), 0.0f);
+  std::vector<float> probs(dimer_length * dimer_length, -1.0f);
 
   std::cout << "Size: " << dimer_seq.size() - 1 << "\n";
 
   for (ptr = pl; ptr->i != 0; ptr++) {
-    const int index = getIndex(ptr->i, ptr->j, seq1.size(), seq2.size());
-    probs[index] = ptr->p;
+    const int index2 = getIndex(ptr->i, ptr->j, dimer_length);
+
+    probs[index2] = ptr->p;
   }
 
   std::cout << "\n[";
   for (size_t i = 0; i < probs.size(); ++i) {
-    if (i % seq1.size() == 0 && i != 0) {
-      std::cout << "][";
+    if (i % dimer_length == 0 && i != 0) {
+      std::cout << "]\n[";
     }
     std::cout << probs[i];
     if (i != probs.size() - 1 && (i + 1) % seq1.size() != 0) {
