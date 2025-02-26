@@ -68,7 +68,7 @@ int main(int argc, const char *const argv[]) {
     return (i - 1) * columns + (j - 1);
   };
 
-  std::vector<float> probs(dimer_length * dimer_length, -1.0f);
+  std::vector<float> probs(dimer_length * dimer_length, -0.0f);
 
   std::cout << "Size: " << dimer_seq.size() - 1 << "\n";
 
